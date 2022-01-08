@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Todo</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  </head>
+  <body>
+    <h1>To-do</h1>
+    <div id="taskList"></div>
+    <li id="listTemplate" style="display: none">
+      <input type="checkbox" />
+      <input name="title" />
+      <button id="save"> Save task to API </button>
+      <button id="delete"> Delete from API </button>
+    </li>
+    <button id="addTask">add task</button>
+    <script>
+      function createNewTask(id, title, marked_as_done) {
+        $(`<div>
+                <li id="${id}" style="display: none;">
+                <input name="${title}" />
+                <button value="save"> Save task to API </button>
+                <button value="delete"> Delete task from API </button>
+            </div>`).appendTo($("#taskList"));
+      }
+      const headers = {
+        Authorization: "Bearer 58Z9SZJen2tHWey8PQkXxsyWOLLE3oXx",
+        "Content-Type": "application/json",
+      };
+      fetch("http://demo2.z-bit.ee/tasks", {
+        headers,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          for (let i = 0; i <= data.length; i++) {
+            createNewTask(data[i].id, data[i].title);
+          }
+        });
+
+      document.querySelector("#addTask").addEventListener("click", () => {
+        var li = document.querySelector("#listTemplate").cloneNode(true);
+        li.style.display = "block";
+        li.querySelector("[name=title]").value = prompt("Add task:");
+        document.querySelector("#taskList").append(li);
+
+        li.querySelector("[id=save]").addEventListener("click", () => {
+          const bodyParams = {
+            title: li.querySelector("[name=title]").value,
+            marked_as_done: true,
+            id: li.dataset.id,
+          };
+          const headers = {
+            Authorization: "Bearer 58Z9SZJen2tHWey8PQkXxsyWOLLE3oXx",
+            "Content-Type": "application/json",
+          };
+          fetch("http://demo2.z-bit.ee/tasks", {
+            method: "POST",
+            headers,
+            body: JSON.stringify(bodyParams),
+          });
+        });
+        li.querySelector("[id=delete]").addEventListener("click", () => {
+          const headers = {
+            Authorization: "Bearer 58Z9SZJen2tHWey8PQkXxsyWOLLE3oXx",
+          };
+
+          console.log(li.dataset.id);
+          li.remove();
+          fetch("http://demo2.z-bit.ee/tasks/" + li.dataset.id, {
+            method: "DELETE",
+            headers,
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
